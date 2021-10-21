@@ -20,13 +20,19 @@ def handle_IAMAT(args):
     
     return 'AT ' + " ".join([server_id, time_stamp, loc, args[2]])
 
-def handle_WHATSAT(args):
+async def handle_WHATSAT(args):
     client_id = args[0]
     radius = args[1]
     upper_bound = args[2]
     
     if client_id not in clients:
         return '? WHATSAT ' + " ".join(args)
+    
+    # TODO: not tested yet. maybe need to use session.post(url, json =...)
+    url = f'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={latitude},{longitude}&radius={radius}&key={config.API_KEY}'
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as response:
+            html = await response.text()
     
     return 'WORKING...' # TODO: embed aiohttp connecting with Google Places API
     
@@ -49,7 +55,7 @@ async def client_call_back(reader, writer):
     
     resp = make_resp_of(query)
     
-    print('Sending: {}'.format(resp))
+    print(f'Sending: {resp}')
     writer.write(resp.encode())
     await writer.drain()
     
@@ -61,7 +67,7 @@ async def run_server(server_id):
         client_call_back, config.LOCALHOST, config.PORTS[server_id])
     
     addrs = ', '.join(str(sock.getsockname()) for sock in server.sockets)
-    print('Serving on {}'.format(addrs))
+    print(f'Serving on {addrs}')
 
     async with server:
         await server.serve_forever()
