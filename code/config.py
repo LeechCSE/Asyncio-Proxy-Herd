@@ -1,5 +1,5 @@
 # Google Maps Platform API info.
-API_KEY = 'AIzaSyDnPUEwv54aplon8Q4HHdEGYwTuIrHrroY'
+API_KEY = 'HIDDEN'
 API_TARGET = '/maps/api/place/nearbysearch/'
 API_FORMAT = 'json?'
 API_HOST = 'maps.googleapis.com'
@@ -8,18 +8,18 @@ API_PORT = 443 # https: 443 / http: 80 for Google Maps Platform services
 SERVER_IDS = ['Goloman', 'Hands', 'Holiday', 'Welsh', 'Wilkes']
 # bidirectional communication pattern
 COMMUNICATION_PATTERN = {
-    'Goloman': ['Hands', 'Holiday', 'Wilkes'],
-    'Hands': ['Goloman', 'Wilkes'],
-    'Holiday': ['Goloman', 'Welsh', 'Wilkes'],
-    'Welsh': ['Holiday'],
-    'Wilkes': ['Goloman', 'Hands', 'Holiday']
+    'Riley': ['Jaquez', 'Juzang'],
+    'Jaquez': ['Riley', 'Bernard'],
+    'Juzang': ['Riley', 'Bernard', 'Campbell'],
+    'Campbell': ['Bernard', 'Juzang'],
+    'Bernard': ['Jaquez', 'Juzang', 'Campbell']
 }
 # assigned ports
 PORTS = {}
-PORTS['Goloman'] = 11645
-PORTS['Hands'] = 11646
-PORTS['Holiday'] = 11647
-PORTS['Welsh'] = 11648
-PORTS['Wilkes'] = 11649
+PORTS['Riley'] = 11645
+PORTS['Jaquez'] = 11646
+PORTS['Juzang'] = 11647
+PORTS['Campbell'] = 11648
+PORTS['Bernard'] = 11649
 
 LOCALHOST = '127.0.0.1'
