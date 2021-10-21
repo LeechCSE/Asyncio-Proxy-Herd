@@ -2,6 +2,9 @@ import config
 import asyncio, aiohttp
 import sys, time
 
+# client_id : server_id, loc, time_stamp
+clients = {}
+
 def handle_IAMAT(args):
     client_id = args[0]
     loc = args[1]
@@ -13,11 +16,20 @@ def handle_IAMAT(args):
         time_stamp += '+'
     time_stamp += '{:.9f}'.format(time_diff)
     
-    return 'AT ' + " ".join([client_id, time_stamp, loc, args[2]])
+    clients[client_id] = [server_id, loc, time_stamp]
+    
+    return 'AT ' + " ".join([server_id, time_stamp, loc, args[2]])
 
 def handle_WHATSAT(args):
+    client_id = args[0]
+    radius = args[1]
+    upper_bound = args[2]
     
-
+    if client_id not in clients:
+        return '? WHATSAT ' + " ".join(args)
+    
+    return 'WORKING...' # TODO: embed aiohttp connecting with Google Places API
+    
 def make_resp_of(query):
     tokens = query.split()
     if tokens[0] == 'IAMAT':
@@ -55,6 +67,7 @@ async def run_server(server_id):
         await server.serve_forever()
 
 def main():
+    global server_id
     server_id = sys.argv[1]
     
     asyncio.run(run_server(server_id))
