@@ -22,14 +22,26 @@ def handle_IAMAT(args):
 
 async def handle_WHATSAT(args):
     client_id = args[0]
-    radius = args[1]
+    radius = args[1] * 1000
     upper_bound = args[2]
     
     if client_id not in clients:
         return '? WHATSAT ' + " ".join(args)
+    if not(0 < radius and radius <= 50) or \
+       not (0 < upper_bound and upper_bound <= 20):
+        return '? WHATSAT ' + " ".join(args)
+    
+    loc = clients[client_id][1]
+    
+    pos = loc.find('-', 1)
+    if pos == -1:
+        pos = loc.find('+', 1)
+    
+    latitude = loc[0 : pos]
+    longitude = loc[pos:]
     
     # TODO: not tested yet. maybe need to use session.post(url, json =...)
-    url = f'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={latitude},{longitude}&radius={radius}&key={config.API_KEY}'
+    url = f'https://maps.googleapis.com/maps/api/place/nearbysearch/json?language=en&location={latitude},{longitude}&radius={radius}&key={config.API_KEY}'
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             html = await response.text()
