@@ -10,7 +10,7 @@
 
 ## Requirements
 - Python 3.7+
-- [aiohttp](https://docs.aiohttp.org/en/stable/, "aiohttp link")
+- [aiohttp](https://docs.aiohttp.org/en/stable/)
 
 ## How to use
 
