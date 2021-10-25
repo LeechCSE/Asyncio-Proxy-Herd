@@ -100,7 +100,7 @@ async def run_server(server_id):
     async with server:
         await server.serve_forever()
 
-def main():
+def main(): # TODO: logging, flood algorihtm
     global server_id
     server_id = sys.argv[1]
     
