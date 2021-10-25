@@ -6,13 +6,11 @@ async def tcp_client(server_id, message):
     reader, writer = await asyncio.open_connection(
         config.LOCALHOST, config.PORTS[server_id])
     
-    print(f'Sending ... {message}')
     writer.write(message.encode())
     
-    data = await reader.read(100)
-    print(f'Received: {data.decode()}')
+    data = await reader.read(-1)
+    print(data.decode())
     
-    print('Close connection')
     writer.close()
     
     

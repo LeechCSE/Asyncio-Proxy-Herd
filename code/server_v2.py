@@ -1,33 +1,38 @@
 import config
 import asyncio, aiohttp
 import sys, time
+import json
 
-# client_id : server_id, loc, time_stamp
+# client_id : server_id, loc, time_stamp, time_recv
 clients = {}
 
-def handle_IAMAT(args):
-    client_id = args[0]
-    loc = args[1]
-    time_recv = float(args[2])
-    
+def get_time_stamp(time_recv):
     time_stamp = ''
     time_diff = time.time() - time_recv
     if time_diff >= 0.0:
         time_stamp += '+'
     time_stamp += '{:.9f}'.format(time_diff)
     
-    clients[client_id] = [server_id, loc, time_stamp]
-    
-    return 'AT ' + " ".join([server_id, time_stamp, loc, args[2]])
+    return time_stamp
 
-async def handle_WHATSAT(args):
+def respond_IAMAT(args):
     client_id = args[0]
-    radius = args[1] * 1000
-    upper_bound = args[2]
+    loc = args[1]
+    time_recv = args[2]
+    time_stamp = get_time_stamp(float(time_recv))
+    # update client info
+    clients[client_id] = [server_id, loc, time_stamp, time_recv]
+    
+    return 'AT ' + " ".join([server_id, time_stamp, client_id, loc, time_recv])
+
+async def respond_WHATSAT(args):
+    client_id = args[0]
+    radius = int(args[1]) * 1000
+    upper_bound = int(args[2])
     
     if client_id not in clients:
         return '? WHATSAT ' + " ".join(args)
-    if not(0 < radius and radius <= 50) or \
+    if not(0 < radius and radius <= 50000) or \
        not (0 < upper_bound and upper_bound <= 20):
         return '? WHATSAT ' + " ".join(args)
     
@@ -40,20 +45,31 @@ async def handle_WHATSAT(args):
     latitude = loc[0 : pos]
     longitude = loc[pos:]
     
-    # TODO: not tested yet. maybe need to use session.post(url, json =...)
-    url = f'https://maps.googleapis.com/maps/api/place/nearbysearch/json?language=en&location={latitude},{longitude}&radius={radius}&key={config.API_KEY}'
+    url = f'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={latitude}%2C{longitude}&radius={radius}&key={config.API_KEY}'
+    
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
-            html = await response.text()
+            json_res = await response.json()
     
-    return 'WORKING...' # TODO: embed aiohttp connecting with Google Places API
+    header_res = 'AT ' + " ".join([server_id, clients[client_id][2], client_id,\
+        clients[client_id][1], clients[client_id][3]])
+    json_res['results'] = json_res['results'][:upper_bound]
     
-def make_resp_of(query):
+    final_res = header_res + '\n'\
+        + json.dumps(json_res, indent=3, ensure_ascii=False) + '\n'
+    
+    return final_res
+
+# List of valid queries:
+#   IAMAT client_id location current_time
+#   WHATSAT client_id radius upper_bound
+async def make_resp_of(query):
     tokens = query.split()
+    
     if tokens[0] == 'IAMAT':
-        return handle_IAMAT(tokens[1:])
+        return respond_IAMAT(tokens[1:])
     elif tokens[0] == 'WHATSAT':
-        return handle_WHATSAT(tokens[1:])
+        return await respond_WHATSAT(tokens[1:])
     else:
         return '? ' + query
         
@@ -65,13 +81,13 @@ async def client_call_back(reader, writer):
     data = await reader.read(100)
     query = data.decode()
     
-    resp = make_resp_of(query)
+    print(f'RCVD: {query}')
+    resp = await make_resp_of(query)
     
-    print(f'Sending: {resp}')
+    print(f'SENT: {resp}')
     writer.write(resp.encode())
     await writer.drain()
     
-    print('Close the connection')
     writer.close()
 
 async def run_server(server_id):
