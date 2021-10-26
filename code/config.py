@@ -1,11 +1,7 @@
 # Google Maps Platform API info.
 API_KEY = 'HIDDEN'
-API_TARGET = '/maps/api/place/nearbysearch/'
-API_FORMAT = 'json?'
-API_HOST = 'maps.googleapis.com'
-API_PORT = 443 # https: 443 / http: 80 for Google Maps Platform services
 # given server list
-SERVER_IDS = ['Goloman', 'Hands', 'Holiday', 'Welsh', 'Wilkes']
+SERVER_IDS = ['Riley', 'Jaquez', 'Juzang', 'Campbell', 'Bernard']
 # bidirectional communication pattern
 COMMUNICATION_PATTERN = {
     'Riley': ['Jaquez', 'Juzang'],
