@@ -5,6 +5,24 @@
 ## Background
 
 ## Structure
+There are five servers connected to each other as the following:
+```
+                   +--------+       +---------+
+            -------| Jaquez |-------| Bernard |            
++-------+   |      +--------+ \   / +---------+
+| Riley |----                   X        |
++-------+   |      +--------+ /   \ +----------+
+            -------| Juzang |-------| Campbell | 
+                   +--------+       +----------+
+```
+The servers accept TCP connections from clients. Clients can access to any 
+server of them(Let's call it *origin server*). The updated information of the 
+clients are automatically propagated through the neighbor servers of the 
+*origin server*, using inter-server communication with 
+[flooding algorithm](https://en.wikipedia.org/wiki/Flooding_%28computer_networking%29).\
+For example, a client reaches `Riley` and updates his/her location. Then, the
+client information is propagated into `Jaquez` and `Juzang` and again into 
+`Bernard` and `Campbell`. 
 
 ## Key features
 
