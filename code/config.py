@@ -11,11 +11,12 @@ COMMUNICATION_PATTERN = {
     'Bernard': ['Jaquez', 'Juzang', 'Campbell']
 }
 # assigned ports
-PORTS = {}
-PORTS['Riley'] = 11645
-PORTS['Jaquez'] = 11646
-PORTS['Juzang'] = 11647
-PORTS['Campbell'] = 11648
-PORTS['Bernard'] = 11649
+PORTS = {
+    'Riley': 11645,
+    'Jaquez': 11646,
+    'Juzang': 11647,
+    'Campbell': 11648,
+    'Bernard': 11649
+}
 
 LOCALHOST = '127.0.0.1'
