@@ -9,12 +9,14 @@ server goes down accidently as long as one is survived. In addition, the
 performance would also increase if the data from the web is cached. In fact, 
 caching output of the client request prevents servers from repeatively requesting
 the same or similar request.  
+
 The target clients are mobile devices with IP addresses and DNS names; therefore,
 the servers take TCP connections. The remarkable characteristic of mobile devices
 is that they frequently broadcast their GPS locations. In order to process the
 frequently-updating information of clients, [asyncio](https://docs.python.org/3/library/asyncio.html) asynchronous networking library is used. It allows the servers concurrently 
 process the requests that come simultaneously. More specifically, a request
 that takes a long time doesn't block the other requests; first done, first out.  
+
 In order to simulate the role of proxy server, the servers serve [Google Places
 Nearby Search](https://developers.google.com/maps/documentation/places/web-service/search-nearby) 
 requests.
