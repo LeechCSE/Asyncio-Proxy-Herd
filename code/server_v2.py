@@ -31,6 +31,7 @@ async def respond_WHATSAT(args):
     upper_bound = int(args[2])
     
     if client_id not in clients:
+        logger.error('Unknown client')
         print('Unknown client')
         return '? WHATSAT ' + " ".join(args)
     if not(0 < radius and radius <= 50000) or \
@@ -46,11 +47,8 @@ async def respond_WHATSAT(args):
     latitude = loc[0 : pos]
     longitude = loc[pos:]
     
-    
     url = f'https://maps.googleapis.com/maps/api/place/nearbysearch/json?location={latitude}%2C{longitude}&radius={radius}&key={config.API_KEY}'
-    
-    print(url)
-    
+   
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as response:
             json_res = await response.json()
@@ -64,7 +62,7 @@ async def respond_WHATSAT(args):
     
     return final_res
 
-# List of valid queries:
+# List of valid client queries:
 #   IAMAT client_id location current_time
 #   WHATSAT client_id radius upper_bound
 async def make_resp_of(query):
@@ -72,50 +70,63 @@ async def make_resp_of(query):
     # queries from clients
     if tokens[0] == 'IAMAT': 
         resp = respond_IAMAT(tokens[1:5])
-        await propagate(resp + f' {server_id}', tokens[6:])
+        await propagate(f'{resp} {server_id}')
         return resp
     elif tokens[0] == 'WHATSAT':
         return await respond_WHATSAT(tokens[1:])
     # for inter-server communication
     elif tokens[0] == 'AT':
-        clients[tokens[3]] = [tokens[1], tokens[4], tokens[2], tokens[5]]
-        print (f'Updated: {tokens[3]}: {clients[tokens[3]]}')
-        await propagate(query + f' {server_id}', tokens[6:])
-        return f'Propagated to {server_id}'
+        new_client = tokens[3]
+        new_info = [tokens[1], tokens[4], tokens[2], tokens[5]]
+        if new_client in clients: # client exists
+            if new_info == clients[new_client]:
+                return 'PG'
+        
+        clients[new_client] = new_info
+        logger.debug(f'Client updated: {new_client}: {clients[new_client]}')
+        print (f'Updated: {new_client}: {clients[new_client]}')
+        
+        await propagate(f'{query} {server_id}')
+        return 'PG'
     else:
         return '? ' + query
 
-async def propagate(message, visited):
-    print (f'path: {visited}')
+async def propagate(message):
+    visited = message.split()[6:]
     for neighbor in config.COMMUNICATION_PATTERN[server_id]:
         if neighbor not in visited:
             try:
+                logger.debug(f'propagated to {neighbor}')
+                print (f'propagated to {neighbor}')
                 reader, writer = await asyncio.open_connection(
                     config.LOCALHOST, config.PORTS[neighbor])
             
                 writer.write(message.encode())
-                
-                data = await reader.read(-1)
-                print(data.decode())
-                
                 writer.close()
             except:
+                logger.warning(f'Neighbor server {neighbor} is down')
                 print (f'Neighbor {neighbor} is down')
 
 # client_connected_cb: called whenever a new client connection is established
 # takes two arguments, (reader, writer), which are intances of StreamReader and
 # StreamWriter classes
-# Since it is  a coroutine function, it is automatically scheduled as a Task
+# Since it is a coroutine function, it is automatically scheduled as a Task
 async def client_call_back(reader, writer):
-    data = await reader.read(100)
+    data = await reader.read(200)
     query = data.decode()
     
+    if query.split()[0] == 'AT':
+        logger.debug(f'RCVD(inter-server comm): {query}')
+    else:
+        logger.info(f'RCVD: {query}')
     print(f'RCVD: {query}')
     resp = await make_resp_of(query)
     
-    print(f'SENT: {resp}')
-    writer.write(resp.encode())
-    await writer.drain()
+    if resp != 'PG': # propagation mark
+        logger.info(f'SENT: {resp}')
+        print(f'SENT: {resp}')
+        writer.write(resp.encode())
+        await writer.drain()
     
     writer.close()
 
@@ -124,19 +135,32 @@ async def run_server(server_id):
         client_call_back, config.LOCALHOST, config.PORTS[server_id])
     
     addrs = ', '.join(str(sock.getsockname()) for sock in server.sockets)
+    
+    logger.info(f'Serving on {addrs}')
     print(f'Serving on {addrs}')
 
     async with server:
         await server.serve_forever()
 
-def main(): # TODO: logging, flood algorihtm
+def main():
     global server_id
     server_id = sys.argv[1]
     if server_id not in config.SERVER_IDS:
         print(f'Error: {server_id} is not valid')
         sys.exit(1)
     
-    asyncio.run(run_server(server_id))
+    global logger
+    logger = logging.getLogger(server_id)
+    logging.basicConfig(filename=f'{server_id}.log',
+        filemode='w', level='DEBUG',
+        format='%(asctime)s %(name)s [%(levelname)s] %(message)s')
+    
+    try:
+        asyncio.run(run_server(server_id))
+    except KeyboardInterrupt:
+        print('Closing server ...')
+        logger.info('Closing server')
+    
 
 if __name__ == '__main__':
     main()
