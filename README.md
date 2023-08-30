@@ -11,11 +11,11 @@ In fact, it prevents servers from repeatedly requesting the same or similar requ
 The target clients are mobile devices with IP addresses and DNS names; therefore,
 the servers take TCP connections. The remarkable characteristic of mobile devices
 is that they frequently broadcast their GPS locations. In order to process the
-frequently-updating information of clients, [asyncio](https://docs.python.org/3/library/asyncio.html) asynchronous networking library is used. It allows the servers concurrently 
+frequently updating information of clients, [asyncio](https://docs.python.org/3/library/asyncio.html) asynchronous networking library is used. It allows the servers concurrently 
 process the requests that come simultaneously. More specifically, a request
 that takes a long time doesn't block the other requests; first done, first out.  
 
-In order to simulate the role of proxy server, the servers serve [Google Places
+In order to simulate the role of a proxy server, the servers serve [Google Places
 Nearby Search](https://developers.google.com/maps/documentation/places/web-service/search-nearby) 
 requests.
 
@@ -30,14 +30,13 @@ There are five servers connected to each other as the following:
             -------| Juzang |-------| Campbell | 
                    +--------+       +----------+
 ```
-The servers accept TCP connections from clients. Clients can access to any 
+The servers accept TCP connections from clients. Clients can access any 
 server of them(Let's call it *origin server*). The updated information of the 
-clients are automatically propagated through the neighbor servers of the 
+clients is automatically propagated through the neighbor servers of the 
 *origin server*, using inter-server communication with 
 [flooding algorithm](https://en.wikipedia.org/wiki/Flooding_%28computer_networking%29).\
-For example, a client reaches `Riley` and updates its location. Then, the
-client information is propagated into `Jaquez` and `Juzang` and again into 
-`Bernard` and `Campbell`. 
+For example, a client reaches out to `Riley` and updates its location. Then, the
+client information is propagated into `Jaquez` and `Juzang` and again into `Bernard` and `Campbell`. 
 
 ## Key features
 - Inter-server communication for realiablity and performance
