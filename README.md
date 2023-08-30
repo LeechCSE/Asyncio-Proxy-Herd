@@ -1,14 +1,12 @@
 # Proxy-herd
 ###### Originally from CS 131: Programming Languages, Spring 2018(Remastered with [Spring 2021 version](https://web.cs.ucla.edu/classes/spring21/cs131/hw/pr.html))
 **Proxy-herd** project simulates a set of proxy servers that cache the information 
-of clients and communicate not only with clients but also internally not only 
-with clients. The inter-server communication guarantees redundancy and 
-reliability of the server system. Caching the same information of clients into 
-multiple servers, the servers can server clients consistently even if one or more 
-server goes down accidently as long as one is survived. In addition, the 
-performance would also increase if the data from the web is cached. In fact, 
-caching output of the client request prevents servers from repeatively requesting
-the same or similar request.  
+of clients and communicate not only with clients but also with servers internally. 
+The inter-server communication guarantees redundancy and reliability of the server system. 
+Caching the same information of clients into multiple servers, the servers 
+can serve clients consistently even if one or more server goes down accidentally as long as one survives. 
+In addition, the performance would also increase if the data from the web is cached. 
+In fact, it prevents servers from repeatedly requesting the same or similar request to cache the output of the client requests.
 
 The target clients are mobile devices with IP addresses and DNS names; therefore,
 the servers take TCP connections. The remarkable characteristic of mobile devices
