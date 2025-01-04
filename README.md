@@ -1,5 +1,5 @@
 # Proxy-herd
-###### Originally from CS 131: Programming Languages, Spring 2018(Remastered with [Spring 2021 version](https://web.cs.ucla.edu/classes/spring21/cs131/hw/pr.html))
+###### Originally from CS 131: Programming Languages, Spring 2018 (Remastered with [Spring 2021 version](https://web.cs.ucla.edu/classes/spring21/cs131/hw/pr.html))
 **Proxy-herd** project simulates a set of proxy servers that cache the information 
 of clients and communicate not only with clients but also with servers internally. 
 The inter-server communication guarantees redundancy and reliability of the server system. 
